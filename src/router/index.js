@@ -14,11 +14,11 @@ Vue.use(VueRouter)
 // path:'*',redirect:'/home'  重定向到path是/home的映射
 const router = new VueRouter({
   routes:[{
-  	path: '/goods', component: require('../components/content/goods.vue')
+  	path: '/goods', component: require('../components/content/goods/goods.vue')
   },{
-  	path: '/ratings', component: require('../components/content/ratings.vue')
+  	path: '/ratings', component: require('../components/content/ratings/ratings.vue')
   },{
-    path: '/seller', component: require('../components/content/seller.vue')
+    path: '/seller', component: require('../components/content/seller/seller.vue')
   },{
   	path:'*',redirect:'/goods'
   }]

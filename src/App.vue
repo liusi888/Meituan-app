@@ -44,7 +44,6 @@
         if (response.erron === ERR_OK) {
           this.seller = response.data;
         }
-        console.log(this.seller);
       }, (response) => {
 
       })

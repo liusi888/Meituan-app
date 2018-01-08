@@ -88,6 +88,7 @@
         this.goods.forEach((good) => {
           good.foods.forEach((food) => {
             //这个地方的food.count相当于直接给food加了一个字段，方便后面的判断数量使用
+            //这个地方的food.count是再cartcontrol里面进行了设置
             if(food.count){
               foods.push(food)
             }

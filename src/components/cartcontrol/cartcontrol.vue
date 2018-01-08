@@ -55,9 +55,7 @@
     .car-decrease
       display :inline-block
       padding :6px
-      &.fade-enter-active
-        transition: all .4s ease
-      &.fade-leave-active
+      &.fade-enter-active,&.fade-leave-active
         transition: all .4s ease
       &.fade-enter, &.fade-leave-to
         transform: rotate(180deg)

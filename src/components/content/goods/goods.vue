@@ -1,8 +1,8 @@
 <template>
   <div class="goods">
-    <div class="menu-wrapper">
+    <div class="menu-wrapper" ref="menuWrapper">
       <ul>
-        <li v-for="item in goods" class="menu-item">
+        <li v-for="(item,index) in goods" class="menu-item" :class="{'current':currentIndex===index}" @click="selectMenu(index,$event)">
           <span class="text">
             <span v-show="item.type>0" class="icon" :class="classMap[item.type]"></span>
             {{item.name}}
@@ -10,9 +10,9 @@
         </li>
       </ul>
     </div>
-    <div class="foods-wrapper">
+    <div class="foods-wrapper" ref="foodsWrapper">
       <ul>
-        <li v-for="item in goods">
+        <li v-for="item in goods" class="food-list-hook">
           <h1 class="title">{{item.name}}</h1>
           <ul>
             <li v-for="food in item.foods" class="food-item border-1px">
@@ -30,17 +30,27 @@
                   <span class="now">¥{{food.price}}</span>
                   <span v-show="food.oldPrice" class="old">¥{{food.oldPrice}}</span>
                 </div>
+                <div class="cartcontrol-wrapper">
+                  <cartcontrol :food="food" v-on:cartAdd="cartAdd"></cartcontrol>
+                </div>
               </div>
-
             </li>
           </ul>
         </li>
       </ul>
     </div>
+    <!--v-ref这个方法可以访问到子组件shopcar-->
+    <shopCar ref="shopCar" :selectFoods="selectFoods" :deliverPrice="seller.deliveryPrice" :minPrice="seller.minPrice"></shopCar>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
+  //  引入滚动的标签库
+  import BScroll from 'better-scroll';
+  //  引入购物车组件
+  import shopCar from '../../shopcart/shopcart.vue';
+  //  引入加减商品的小组件
+  import cartcontrol from '../../cartcontrol/cartcontrol.vue';
   const ERR_OK = 0;
   export default{
     props:{
@@ -48,11 +58,42 @@
 
       }
     },
+    components:{
+      shopCar,
+      cartcontrol
+    },
     data(){
       return{
         classMap:[],
         goods:[],
-
+        listHeight:[], //列表每一块的高度
+        scrollY:0,
+      }
+    },
+    computed: {
+      //计算右侧商品在哪个版块区域，并且返回改版块区域的下标
+      currentIndex() {
+        for(let i=0;i<this.listHeight.length;i++){
+          let height1=this.listHeight[i];
+          let height2=this.listHeight[i+1];
+          if(!height2||(this.scrollY>=height1&&this.scrollY<height2)){
+            return i;
+          }
+        }
+        return 0;
+      },
+      //计算选中的商品
+      selectFoods() {
+        let foods=[];
+        this.goods.forEach((good) => {
+          good.foods.forEach((food) => {
+            //这个地方的food.count相当于直接给food加了一个字段，方便后面的判断数量使用
+            if(food.count){
+              foods.push(food)
+            }
+          })
+        })
+        return foods;
       }
     },
     created(){
@@ -61,9 +102,71 @@
         response = response.body;
         if (response.erron === ERR_OK) {
           this.goods = response.data;
+          //this._initScroll();  不能直接写，由于vue是异步的，当在调取这个方法的时候，数据还没有更新好，所以高度没有起作用，要使用$nextTick这个函数解决
+          this.$nextTick(() => {
+            this._initScroll();
+            this._calculateHeight();
+          })
         }
-      })
-    }
+      });
+      this.$on('cart-add',(target) => {
+        this.functionName(target)
+      });
+    },
+    methods: {
+      //这个方法是用来计算右侧商品滚动区域的高度的
+      _initScroll() {
+        this.menuScroll=new BScroll(this.$refs.menuWrapper, {
+          click:true
+        });
+
+        this.foodsScroll=new BScroll(this.$refs.foodsWrapper, {
+          click:true,
+          probeType:3
+        });
+        //做右侧的商品y轴的位置
+        this.foodsScroll.on('scroll',(pos) => {
+          //pos.y是滚动的y轴的距离
+          this.scrollY=Math.abs(Math.round(pos.y));
+        })
+      },
+      _calculateHeight() {
+        //右侧商品的每一个大的区块（包括标题）
+        let foodList=this.$refs.foodsWrapper.getElementsByClassName('food-list-hook');
+        let height=0;
+        this.listHeight.push(height);
+        for(let i=0;i<foodList.length;i++){
+          let item=foodList[i];
+          height+=item.clientHeight;
+          this.listHeight.push(height);
+        }
+      },
+      //点击左侧菜单，对应到右侧的商品区域
+      selectMenu(index,event) {
+        //浏览器的派生事件里面没有_constructed，而我们自己派生的点击事件里面有_constructed并且为true。
+        //这一步判断是为了屏蔽掉pc端，出现了2次点击事件
+        if(!event._constructed){
+          return;
+        }
+        let foodList=this.$refs.foodsWrapper.getElementsByClassName('food-list-hook');
+        let el=foodList[index];
+        this.foodsScroll.scrollToElement(el,300)
+      },
+      _drop(target) {
+        // 这样是可以调用到子组件shopcart的drop方法的，并且传递给子组件target
+        //优化体验异步动画
+        this.$nextTick(() =>{
+          this.$refs.shopCar.drop(target)
+        })
+      },
+      //父组件goods监听子组件cartcontrol传送过来的dom对象，然后再传给shopcar（为加入商品的小球动画做准备）
+      cartAdd(target) {
+        this._drop(target)
+      }
+
+    },
+
+
   }
 </script>
 
@@ -86,6 +189,14 @@
         width :56px
         padding:0 12px
         line-height :14px
+        &.current
+          position :relative
+          margin-top: -1px
+          z-index: 1
+          background :#ffffff
+          font-weight :700
+          .text
+            border-none()
         .icon
           display :inline-block
           vertical-align :top
@@ -120,7 +231,6 @@
         font-size :12px
         color:rgb(147,153,159)
         background :#f3f5f7
-
       .food-item
         display :flex
         margin: 18px
@@ -146,6 +256,7 @@
             color:rgb(147,153,159)
           .desc
             margin-bottom: 8px
+            line-height :12px
           .extra
             .count
               margin-right :12px
@@ -160,11 +271,8 @@
               text-decoration:line-through
               font-size: 10px
               color:rgb(147,153,159)
-
-
-
-
-
-
-
+          .cartcontrol-wrapper
+            position :absolute
+            right :0px
+            bottom :12px
 </style>

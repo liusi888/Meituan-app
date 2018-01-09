@@ -15,7 +15,7 @@
         <li v-for="item in goods" class="food-list-hook">
           <h1 class="title">{{item.name}}</h1>
           <ul>
-            <li v-for="food in item.foods" class="food-item border-1px">
+            <li v-for="food in item.foods" class="food-item border-1px" @click="selectFood(food,$event)">
               <div class="icon">
                 <img width="57" height="57" :src="food.icon">
               </div>
@@ -41,6 +41,7 @@
     </div>
     <!--v-ref这个方法可以访问到子组件shopcar-->
     <shopCar ref="shopCar" :selectFoods="selectFoods" :deliverPrice="seller.deliveryPrice" :minPrice="seller.minPrice"></shopCar>
+    <food :food="selectedFood" ref="food"></food>
   </div>
 </template>
 
@@ -51,6 +52,8 @@
   import shopCar from '../../shopcart/shopcart.vue';
   //  引入加减商品的小组件
   import cartcontrol from '../../cartcontrol/cartcontrol.vue';
+  //  引入商品详情组件
+  import food from '../../food/food.vue';
   const ERR_OK = 0;
   export default{
     props:{
@@ -60,7 +63,8 @@
     },
     components:{
       shopCar,
-      cartcontrol
+      cartcontrol,
+      food
     },
     data(){
       return{
@@ -68,6 +72,7 @@
         goods:[],
         listHeight:[], //列表每一块的高度
         scrollY:0,
+        selectedFood:[]
       }
     },
     computed: {
@@ -163,6 +168,15 @@
       //父组件goods监听子组件cartcontrol传送过来的dom对象，然后再传给shopcar（为加入商品的小球动画做准备）
       cartAdd(target) {
         this._drop(target)
+      },
+      //点击商品跳转商品详情
+      selectFood(food,event) {
+        if(!event._constructed){
+          return;
+        }
+
+        this.selectedFood=food;
+        this.$refs.food.show()
       }
 
     },

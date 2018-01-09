@@ -13,22 +13,21 @@
           <div class="price" :class="{'heightLight':totalPrice>0}">¥{{totalPrice}}元</div>
           <div class="desc" >另需配送费¥{{deliverPrice}}元</div>
         </div>
-        <div class="content-right"@click.stop="pay">
+        <div class="content-right" @click.stop="pay">
           <div class="pay" :class="payClass">{{payDesc}}</div>
         </div>
       </div>
       <!--小球动画-->
-      <transition
-        name="fade"
-        v-on:before-enter="beforeEnter"
-        v-on:enter="enter"
-        v-on:after-enter="afterEnter"
-      >
-        <div class="ball-container">
-          <div v-for="ball in balls" v-show="ball.show" class="ball"></div>
-          <div class="inner inner-hook"></div>
+      <div class="ball-container">
+        <!--小球-->
+        <div v-for="ball in balls">
+          <transition name="drop" @before-enter="beforeDrop" @enter="dropping" @after-enter="afterDrop">
+            <div class="ball" v-show="ball.show">
+              <div class="inner inner-hook"></div>
+            </div>
+          </transition>
         </div>
-      </transition>
+      </div>
       <!--购物车列表-->
       <transition name="fade-fold">
         <div class="shopcart-list" v-show="listShow">
@@ -169,45 +168,37 @@
 
         }
       },
-      // --------
-      // 进入中
-      // --------
-
-      beforeEnter: function (el) {
-        let count=this.balls.length;
-        while(count--){
-          let ball=this.balls[count];
-          if(ball.show){
-            let rect=ball.el.getBoundingClientRect();
-            let x=rect.left-32;
-            let y=-(window.innerHeight-rect.top-22);
-            el.style.display=' ';
-            el.style.webkitTransform=`translate3d(0,$(y)px,0)`;
-            el.style.transform=`translate3d(0,$(y)px,0)`;
-            let inner=el.getElementsByClassName('inner-hook')[0];
-            inner.style.webkitTransform=`translate3d($(x)px,0,0)`;
-            inner.style.transform=`translate3d($(x)px,0,0)`;
+      beforeDrop(el) { /* 购物车小球动画实现 */
+        let count = this.balls.length;
+        while(count--) {
+          let ball = this.balls[count];
+          if(ball.show) {
+            let rect = ball.el.getBoundingClientRect(); //元素相对于视口的位置
+            let x = rect.left - 32;
+            let y = -(window.innerHeight - rect.top - 22); //获取y
+            el.style.display = '';
+            el.style.webkitTransform = 'translateY(' + y + 'px)'; //translateY
+            el.style.transform = 'translateY(' + y + 'px)';
+            let inner = el.getElementsByClassName('inner-hook')[0];
+            inner.style.webkitTransform = 'translateX(' + x + 'px)';
+            inner.style.transform = 'translateX(' + x + 'px)';
           }
         }
       },
-      // 与 CSS 结合时使用
-      enter: function (el,done) {
-        console.log(1);
-        let rf=el.offsetHeight;
-        this.$nextTick(() =>{
-          el.style.webkitTransform='translate3d(0,0,0)';
-          el.style.transform='translate3d(0,0,0)';
-          let inner=el.getElementsByClassName('inner-hook')[0];
-          inner.style.webkitTransform='translate3d(0,0,0)';
-          inner.style.transform='translate3d(0,0,0)';
-        })
-
+      dropping(el, done) { /*重置小球数量  样式重置*/
+        let rf = el.offsetHeight;
+        el.style.webkitTransform = 'translate3d(0,0,0)';
+        el.style.transform = 'translate3d(0,0,0)';
+        let inner = el.getElementsByClassName('inner-hook')[0];
+        inner.style.webkitTransform = 'translate3d(0,0,0)';
+        inner.style.transform = 'translate3d(0,0,0)';
+        el.addEventListener('transitionend', done);
       },
-      afterEnter: function (el) {
-        let ball=this.dropBalls.shift();
-        if(ball){
-          ball.show=false;
-          el.style.display='none';
+      afterDrop(el) { /*初始化小球*/
+        let ball = this.dropBalls.shift();
+        if(ball) {
+          ball.show = false;
+          el.style.display = 'none';
         }
       },
       //切换显示购物车列表
@@ -345,8 +336,6 @@
           border-radius :50%
           background :rgb(0,160,200)
           transition: all .4s linear
-
-
     .shopcart-list
       position :absolute
       left: 0

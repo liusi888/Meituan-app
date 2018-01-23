@@ -1,8 +1,12 @@
 <template>
-  <div>评论22</div>
+  <div class="ratings">
+    <div class="ratings-content">
+
+    </div>
+  </div>
 </template>
 
-<script>
+<script type="text/ecmascript-6">
   export default {
     data () {
       return {
@@ -12,6 +16,6 @@
   }
 </script>
 
-<style>
+<style lang="stylus" rel="stylesheet/stylus">
 
 </style>

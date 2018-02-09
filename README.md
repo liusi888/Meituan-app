@@ -14,6 +14,8 @@ components     放组件
   food         商品详情组件
   split        空间间隔组件
 
+#效果展示图
+https://github.com/liusi888/Meituan-app/raw/master/gitImg/1.png
 
 > A Vue.js project
 

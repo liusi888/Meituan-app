@@ -1,8 +1,11 @@
 # 这是一个仿照美团外卖的例子
 
-##目录结构
-*main.js        入口文件
-*router         路由文件
+目录结构
+
+main.js        入口文件
+
+router         路由文件
+
 *App.vue        所有页面的集合点
 *components     放组件
   *header       头部组件

@@ -17,9 +17,6 @@
       <!-- 路由匹配到的组件将渲染在这里 -->
       <router-view :seller="seller"></router-view>
     </div>
-    <div class="con">
-      i am con
-    </div>
   </div>
 </template>
 

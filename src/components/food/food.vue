@@ -79,7 +79,6 @@
       cartcontrol,
       split,
       ratingselect,
-
     },
     data() {
       return {
@@ -190,7 +189,6 @@
             padding:10px
             font-size :20px
             color:#fff
-
       .content
         padding: 18px
         position :relative

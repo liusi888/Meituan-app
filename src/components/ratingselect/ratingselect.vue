@@ -140,7 +140,4 @@
         vertical-align :top
         font-size:12px
         border-1px(rgba(7,17,27,0.1))
-
-
-
 </style>

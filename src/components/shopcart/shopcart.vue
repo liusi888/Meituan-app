@@ -43,7 +43,7 @@
                   <span>¥{{food.price*food.count}}</span>
                 </div>
                 <div class="cartcontrol-wrapper">
-                  <cartcontrol :food="food"></cartcontrol>
+                  <cartcontrol :food="food" v-on:cartAdd="cartAdd"></cartcontrol>
                 </div>
               </li>
             </ul>
@@ -155,6 +155,10 @@
 
     },
     methods:{
+      //父组件shopcart监听子组件cartcontrol传送过来的dom对象（为加入商品的小球动画做准备）
+      cartAdd(target) {
+        this.drop(target)
+      },
       //这个drop的方法里面的el参数，是从父组件goods里面传过来的商品的右侧的点击加的按钮的dom对象
       drop(el) {
         for(let i=0;i<this.balls.length;i++){
@@ -169,6 +173,7 @@
         }
       },
       beforeDrop(el) { /* 购物车小球动画实现 */
+        console.log('购物车小球动画实现');
         let count = this.balls.length;
         while(count--) {
           let ball = this.balls[count];
@@ -186,6 +191,7 @@
         }
       },
       dropping(el, done) { /*重置小球数量  样式重置*/
+        console.log('重置小球数量  样式重置');
         let rf = el.offsetHeight;
         el.style.webkitTransform = 'translate3d(0,0,0)';
         el.style.transform = 'translate3d(0,0,0)';

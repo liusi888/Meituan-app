@@ -136,6 +136,7 @@
         margin-right: 4px
         &.active
           background :rgb(0,160,220)
+          border-radius :50%
       .text
         vertical-align :top
         font-size:12px
